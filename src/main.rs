@@ -1,5 +1,5 @@
-use irc::client::prelude::*;
 use futures::prelude::*;
+use irc::client::prelude::*;
 
 #[tokio::main]
 async fn main() -> irc::error::Result<()> {
@@ -7,6 +7,7 @@ async fn main() -> irc::error::Result<()> {
         nickname: Some("asochatst".to_owned()),
         server: Some("chat.freenode.net".to_owned()),
         channels: vec!["#asochatst".to_owned()],
+        use_tls: Some(false),
         ..Default::default()
     };
     
@@ -18,13 +19,14 @@ async fn main() -> irc::error::Result<()> {
 
     while let Some(message) = stream.next().await.transpose()? {
         print!("{}", message);
+
         match message.command {
             Command::PRIVMSG(ref target, ref msg) => {
                 sender.send_privmsg(target, "hello")?;
             }
+            _ => (),
         }
-        _ => (),
     }
 
-    ok(());
+    Ok(());
 }
