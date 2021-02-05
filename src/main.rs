@@ -5,6 +5,8 @@ use std::error::Error;
 
 use futures::prelude::*;
 use irc::client::prelude::*;
+use log::{debug, error, info, trace, warn};
+use chrono::{Local, DateTime, TimeZone};
 
 use crate::actions::{Executable, ListDir};
 
@@ -15,8 +17,28 @@ const VPN_START_CMD: &'static str = "vpn start";
 const VPN_START_TOKEN: &'static str = "token";
 
 
+
+fn setup_logger() -> Result<(), fern::InitError> {
+    fern::Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{}[{}][{}] {}",
+                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Debug)
+        .chain(std::io::stdout())
+        .chain(fern::log_file("output.log")?)
+        .apply()?;
+    Ok(())
+}
+
 #[tokio::main]
 async fn main() -> Result<(), failure::Error> {
+    setup_logger();
 
     // We can also load the Config at runtime via Config::load("path/to/config.toml")
     let config = Config {
@@ -40,14 +62,14 @@ async fn main() -> Result<(), failure::Error> {
                     let msg_tokens: Vec<&str> = msg.split(LS_DIR_CMD).collect();
                     let ls_path = msg_tokens[1].trim();
                     if !ls_path.is_empty() {
-                        println!("DEBUG {} {}", msg_tokens[0], msg_tokens[1]);
+                        debug!("DEBUG {} {}", msg_tokens[0], msg_tokens[1]);
                         let list_dir = ListDir { arguments: ls_path.to_string(), msg: message.to_owned() };
                         let results = &list_dir.execute().replace("\n", ", ");
-                        println!("DEBUG ls dir: {}", results);
+                        debug!("DEBUG ls dir: {}", results);
                         let response = format!("{}", results);
                         client.send_privmsg(&channel, response).unwrap();
                     } else {
-                        println!("DEBUG ls path not provided");
+                        debug!("DEBUG ls path not provided");
                     }
                     //TODO implement pattern matching using my custom commands
                 } else if msg.starts_with(VPN_START_CMD) {
