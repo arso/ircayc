@@ -77,6 +77,7 @@ async fn main() -> Result<(), failure::Error> {
                         match base64::decode(msg_tokens[1].trim()) {
                             Ok(vpn_token) => {
                                 //TODO encrypt & decrypt
+                                debug!("Found encrypted vpn token {}", vpn_token);
                                 client.send_privmsg(&channel, vpn_token).unwrap();
                             }
                             Err(err) => {
