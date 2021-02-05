@@ -3,10 +3,10 @@ extern crate irc;
 
 use std::error::Error;
 
+use chrono::{DateTime, Local, SecondsFormat, TimeZone};
 use futures::prelude::*;
 use irc::client::prelude::*;
 use log::{debug, error, info, trace, warn};
-use chrono::{Local, DateTime, TimeZone};
 
 use crate::actions::{Executable, ListDir};
 
@@ -17,13 +17,12 @@ const VPN_START_CMD: &'static str = "vpn start";
 const VPN_START_TOKEN: &'static str = "token";
 
 
-
 fn setup_logger() -> Result<(), fern::InitError> {
     fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
                 "{}[{}][{}] {}",
-                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S%.3f]"),
                 record.target(),
                 record.level(),
                 message
