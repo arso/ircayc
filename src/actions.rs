@@ -22,7 +22,6 @@ impl Executable for ListDir {
             .args(&["l","a",&self.arguments])
             .output()
             .expect("failed to execute process");
-        println!("status: {}", dirs.status);
         String::from_utf8(dirs.stdout).unwrap()
     }
 }
