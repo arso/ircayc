@@ -4,12 +4,12 @@ extern crate irc;
 use futures::prelude::*;
 use irc::client::prelude::*;
 
-use lsdir::ListDir;
+use dir::ListDir;
 
 use crate::actions::Executable;
 use crate::vpn::ConnectVPN;
 
-mod lsdir;
+mod dir;
 mod vpn;
 mod actions;
 
@@ -52,7 +52,7 @@ async fn main() -> Result<(), failure::Error> {
             Command::PRIVMSG(ref channel, ref message_txt) => {
                 let normalized_message = message_txt.trim_start().to_lowercase();
                 //TODO implement pattern matching using my custom commands
-                if normalized_message.starts_with(lsdir::LS_DIR_CMD) {
+                if normalized_message.starts_with(dir::LS_DIR_CMD) {
                     let list_dir = ListDir { msg: normalized_message.to_owned() };
                     let results = list_dir.execute();
                     client.send_privmsg(&channel, results).unwrap();
